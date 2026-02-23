@@ -1,0 +1,14 @@
+[
+  {
+    "id": "server1-userA",
+    "serverId": "server1",
+    "url": "http://audiobookshelf-server1:13378",
+    "tokenFile": "/run/secrets/server1_userA_token"
+  },
+  {
+    "id": "server2-userB",
+    "serverId": "server2",
+    "url": "http://audiobookshelf-server2:13378",
+    "tokenFile": "/run/secrets/server2_userB_token"
+  }
+]

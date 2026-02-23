@@ -1,0 +1,70 @@
+#!/usr/bin/with-contenv bash
+# shellcheck shell=bash
+set -euo pipefail
+
+start_mariadb() {
+  if [[ -z ${LSIO_NON_ROOT_USER:-} ]]; then
+    mariadbd --datadir="${DATADIR}" --init-file="${tmp_sql}" --pid-file=/run/mysqld/mysqld.pid --user=abc &
+  else
+    mariadbd --datadir="${DATADIR}" --init-file="${tmp_sql}" --pid-file=/run/mysqld/mysqld.pid &
+  fi
+
+  pid="$!"
+  for _ in $(seq 1 60); do
+    mariadb -uroot -e "status" >/dev/null 2>&1 && return 0
+    sleep 1
+  done
+  echo "[initdb] mariadb startup timeout"
+  return 1
+}
+
+if [[ -f /config/env ]]; then
+  # shellcheck disable=SC1091
+  source /config/env
+fi
+
+ABS_DB_NAME="${ABS_DB_NAME:-abshelflife}"
+ABS_DB_USER="${ABS_DB_USER:-abshelflife}"
+ABS_DB_PASSWORD="${ABS_DB_PASSWORD:-}"
+MYSQL_ROOT_PASSWORD="${MYSQL_ROOT_PASSWORD:-}"
+
+if [[ ! -d "${DATADIR}/mysql" ]]; then
+  tmp_sql="$(mktemp)"
+
+  {
+    echo "DELETE FROM mysql.user WHERE user <> 'mariadb.sys' AND user <> 'root';"
+
+    if [[ ${#MYSQL_ROOT_PASSWORD} -lt 4 ]]; then
+      echo "CREATE USER 'root'@'%' IDENTIFIED BY '';"
+    else
+      echo "CREATE USER 'root'@'%' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';"
+    fi
+
+    echo "GRANT ALL ON *.* TO 'root'@'%' WITH GRANT OPTION;"
+    echo "DROP DATABASE IF EXISTS test;"
+
+    if [[ -n "${ABS_DB_PASSWORD}" ]]; then
+      echo "CREATE DATABASE IF NOT EXISTS \`${ABS_DB_NAME}\`;"
+      echo "CREATE USER IF NOT EXISTS '${ABS_DB_USER}'@'%' IDENTIFIED BY '${ABS_DB_PASSWORD}';"
+      echo "GRANT ALL PRIVILEGES ON \`${ABS_DB_NAME}\`.* TO '${ABS_DB_USER}'@'%';"
+    fi
+  } > "${tmp_sql}"
+
+  if [[ -z ${LSIO_NON_ROOT_USER:-} ]]; then
+    lsiown -R abc:abc "${tmp_sql}" /config/log/mysql /run/mysqld
+    chmod -R 777 /config/log/mysql /run/mysqld
+    mariadb-install-db --datadir="${DATADIR}" --user=abc --auth-root-authentication-method=normal
+  else
+    mariadb-install-db --datadir="${DATADIR}" --auth-root-authentication-method=normal
+  fi
+
+  start_mariadb
+  mariadb-admin -u root shutdown
+  wait "${pid}"
+
+  rm -f "${tmp_sql}"
+fi
+
+if [[ -z ${LSIO_NON_ROOT_USER:-} ]]; then
+  lsiown -R abc:abc /run/mysqld /config
+fi

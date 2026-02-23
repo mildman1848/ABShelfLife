@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <h2>⚙️ {{ t('section.sync_settings') }}</h2>
+  <p class="muted">{{ t('sync.subtitle') }}</p>
+
+  <form method="post" class="grid grid-3">
+    <input type="hidden" name="action" value="noop">
+    <div>
+      <label>{{ t('sync.interval') }}</label>
+      <input name="sync_interval_seconds" type="number" min="30" max="86400" value="{{ settings.sync_interval_seconds }}">
+    </div>
+    <div><label>&nbsp;</label><button class="btn" type="submit">{{ t('action.save_interval') }}</button></div>
+    <div><label>&nbsp;</label><button class="btn secondary" type="submit" formaction="{{ url_for('sync_run_now') }}" formmethod="post">{{ t('action.run_sync_now') }}</button></div>
+    <div><label>&nbsp;</label><button class="btn" type="submit" formaction="{{ url_for('sync_import_collected') }}" formmethod="post">{{ t('action.import_collected') }}</button></div>
+    <div><label>&nbsp;</label><button class="btn secondary" type="submit" formaction="{{ url_for('sync_import_podcasts') }}" formmethod="post">{{ t('action.import_podcasts') }}</button></div>
+    <div><label>&nbsp;</label><button class="btn" type="submit" formaction="{{ url_for('sync_rebuild_progress') }}" formmethod="post">{{ t('action.rebuild_progress') }}</button></div>
+    <div><label>&nbsp;</label><button class="btn danger" type="submit" formaction="{{ url_for('sync_cleanup_collected') }}" formmethod="post" onclick="return confirm('Clean collected library now?');">{{ t('action.cleanup_collected') }}</button></div>
+    <div><label>&nbsp;</label><a class="btn secondary" href="{{ url_for('matching_view') }}">{{ t('action.open_matching') }}</a></div>
+    <div><label>&nbsp;</label><a class="btn secondary" href="{{ url_for('history_view') }}">{{ t('nav.history') }}</a></div>
+  </form>
+</div>
+
+<div class="card">
+  <h3>{% if edit_account %}{{ t('sync.account_form_edit') }}{% else %}{{ t('sync.account_form_add') }}{% endif %}</h3>
+  <form method="post" class="grid grid-2">
+    <input type="hidden" name="action" value="save_account">
+    <input type="hidden" name="account_id" value="{{ edit_account.id if edit_account else '' }}">
+    <div><label>{{ t('sync.abs_url') }}</label><input name="abs_url" placeholder="http://192.168.1.10:13378" value="{{ edit_account.abs_url if edit_account else '' }}" required></div>
+    <div><label>{{ t('sync.abs_username') }}</label><input name="abs_username" value="{{ edit_account.abs_username if edit_account else '' }}" required></div>
+    <div style="grid-column: span 2;"><label>{{ t('sync.api_token') }}</label><input name="api_token" placeholder="{{ t('sync.api_token_help') }}"></div>
+    <div>
+      <label>{{ t('sync.enabled') }}</label>
+      <select name="enabled">
+        <option value="1" {% if not edit_account or edit_account.enabled %}selected{% endif %}>{{ t('common.yes') }}</option>
+        <option value="0" {% if edit_account and not edit_account.enabled %}selected{% endif %}>{{ t('common.no') }}</option>
+      </select>
+    </div>
+    <div><label>&nbsp;</label><button class="btn" type="submit">{{ t('action.save') }}</button></div>
+    {% if edit_account %}
+    <div>
+      <label>&nbsp;</label>
+      <a class="btn secondary" href="{{ url_for('sync_settings') }}">{{ t('action.cancel_edit') }}</a>
+    </div>
+    {% endif %}
+    <div><input type="hidden" name="sync_interval_seconds" value="{{ settings.sync_interval_seconds }}"></div>
+  </form>
+</div>
+
+<div class="card">
+  <h3>🔗 {{ t('section.sync_accounts') }}</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>{{ t('sync.table_url') }}</th>
+        <th>{{ t('sync.table_user') }}</th>
+        <th>{{ t('sync.table_enabled') }}</th>
+        <th>{{ t('sync.table_updated') }}</th>
+        <th>{{ t('sync.table_actions') }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for a in accounts %}
+      <tr>
+        <td>{{ a.abs_url }}</td>
+        <td>{{ a.abs_username }}</td>
+        <td>{% if a.enabled %}<span class="pill ok">{{ t('common.yes') }}</span>{% else %}<span class="pill no">{{ t('common.no') }}</span>{% endif %}</td>
+        <td>{{ a.updated_at }}</td>
+        <td>
+          <div class="actions">
+            <form method="get" action="{{ url_for('sync_settings') }}">
+              <input type="hidden" name="edit_account_id" value="{{ a.id }}">
+              <button class="btn" type="submit">{{ t('action.edit') }}</button>
+            </form>
+            <form method="post" action="{{ url_for('sync_settings') }}" onsubmit="return confirm('Delete account?');">
+              <input type="hidden" name="action" value="delete_account">
+              <input type="hidden" name="account_id" value="{{ a.id }}">
+              <input type="hidden" name="sync_interval_seconds" value="{{ settings.sync_interval_seconds }}">
+              <button class="btn danger" type="submit">{{ t('action.delete') }}</button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,6 @@
+[weblate]
+url = https://hosted.weblate.org/api/
+translation = abshelflife/main
+
+[keys]
+https://hosted.weblate.org/api/ = <your-weblate-api-token>

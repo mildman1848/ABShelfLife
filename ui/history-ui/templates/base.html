@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="{{ lang }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ABShelfLife</title>
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='abshelflife-icon.svg') }}">
+  <style>
+    :root { --bg:#f3f6fb; --ink:#0f1c33; --muted:#5c6880; --card:#ffffff; --line:#d5deef; --accent:#1d4ed8; --accent-2:#0f766e; --danger:#b91c1c; --ok:#166534; --panel:#f9fbff; --panel-soft:#eef4ff; }
+    [data-theme="dark"] { --bg:#07101d; --ink:#f4f7ff; --muted:#b8c7e6; --card:#0f1a2d; --line:#344868; --accent:#7db7ff; --accent-2:#49d7bb; --danger:#ff8a8a; --ok:#67dd95; --panel:#182844; --panel-soft:#132039; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: "IBM Plex Sans", "Noto Sans", sans-serif; color: var(--ink); background: radial-gradient(circle at 0% 0%, #dbe9ff, var(--bg) 42%); }
+    [data-theme="dark"] body { background: radial-gradient(circle at 0% 0%, #162948, var(--bg) 44%); }
+    .wrap { max-width: 1240px; margin: 0 auto; padding: 20px; }
+    .topbar { display: grid; grid-template-columns: 1fr auto; gap: 10px; margin-bottom: 14px; align-items: center; }
+    .brand { font-weight: 800; font-size: 22px; letter-spacing: .2px; display: inline-flex; align-items: center; gap: 10px; }
+    .brand img { width: 28px; height: 28px; border-radius: 8px; }
+    .brand small { color: var(--muted); font-weight: 600; font-size: 12px; margin-left: 2px; display: none; }
+    .top-controls { display: inline-flex; align-items: center; gap: 8px; }
+    .top-controls select { width: auto; min-width: 120px; }
+    .nav { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px; }
+    .nav a { text-decoration: none; color: var(--ink); border: 1px solid var(--line); background: var(--panel); border-radius: 10px; padding: 8px 10px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02); }
+    .nav a.logout { color: #7f1d1d; }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px; margin-bottom: 14px; box-shadow: 0 8px 28px rgba(18, 34, 69, 0.05); }
+    .card h2, .card h3 { margin: 0 0 8px; }
+    .muted { color: var(--muted); }
+    .stats-grid { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); margin-top: 8px; }
+    .stat { border: 1px solid var(--line); border-radius: 12px; background: var(--panel-soft); padding: 10px; }
+    .stat strong { display: block; font-size: 22px; line-height: 1.1; margin-bottom: 3px; }
+    .stat span { color: var(--muted); font-size: 12px; }
+    .books-grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(245px, 1fr)); }
+    .book-card { display: grid; grid-template-columns: 92px 1fr; gap: 10px; border: 1px solid var(--line); border-radius: 12px; padding: 10px; background: var(--panel-soft); }
+    .book-cover-wrap { width: 92px; aspect-ratio: 1 / 1; border-radius: 10px; overflow: hidden; border: 1px solid var(--line); background: #e7eefc; display: block; text-decoration: none; }
+    .book-cover { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .book-cover-fallback { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 700; color: #5f7097; }
+    .book-meta h4 { margin: 0 0 6px; font-size: 15px; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .book-meta p { margin: 2px 0; font-size: 12px; color: var(--ink); opacity: .92; }
+    .actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .actions form { flex: 1 1 120px; margin: 0; }
+    .btn { border: 0; border-radius: 8px; padding: 7px 10px; color: #fff; background: var(--accent); cursor: pointer; font-size: 12px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
+    .actions .btn { width: 100%; }
+    .btn.secondary { background: var(--accent-2); }
+    .btn.danger { background: var(--danger); }
+    label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+    input, select, textarea { width: 100%; padding: 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--card); color: var(--ink); }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { padding: 7px 8px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+    a { color: var(--accent); }
+    .flash { padding: 10px; border-radius: 8px; margin-bottom: 10px; }
+    .flash.ok { background: #e7f9ee; color: #14532d; border: 1px solid #b4ebc8; }
+    .flash.error { background: #feecec; color: #7f1d1d; border: 1px solid #ffc9c9; }
+    .grid { display: grid; gap: 10px; }
+    .grid-2 { grid-template-columns: repeat(2, minmax(200px, 1fr)); }
+    .grid-3 { grid-template-columns: repeat(3, minmax(200px, 1fr)); }
+    .pill { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 999px; }
+    .pill.ok { background: #dcfce7; color: #166534; }
+    .pill.no { background: #fee2e2; color: #991b1b; }
+    @media (max-width: 900px) {
+      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+      .book-card { grid-template-columns: 84px 1fr; }
+      .book-cover-wrap { width: 84px; }
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) { --bg:#07101d; --ink:#f4f7ff; --muted:#b8c7e6; --card:#0f1a2d; --line:#344868; --accent:#7db7ff; --accent-2:#49d7bb; --danger:#ff8a8a; --ok:#67dd95; --panel:#182844; --panel-soft:#132039; }
+    }
+    [data-theme="dark"] .nav a { color: #f4f7ff; background: var(--panel); border-color: var(--line); }
+    [data-theme="dark"] .book-meta p { color: #dce6ff; }
+    [data-theme="dark"] .book-cover-wrap { background: #0c1730; }
+    [data-theme="dark"] .flash.ok { background: #103822; color: #9be2b5; border-color: #1f6b3c; }
+    [data-theme="dark"] .flash.error { background: #3a1717; color: #ffb3b3; border-color: #6c2e2e; }
+    [data-theme="dark"] input, [data-theme="dark"] select, [data-theme="dark"] textarea { background: #101d35; color: #f4f7ff; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand">
+        <img src="{{ url_for('static', filename='abshelflife-icon.svg') }}" alt="ABShelfLife">
+        <span>ABShelfLife</span>
+      </div>
+      <div class="top-controls">
+        <form method="get" action="{{ url_for('set_language', lang_code='en') }}" id="lang-form" style="display:inline-flex;align-items:center;">
+          <select id="lang-select" onchange="window.location.href='/set-language/' + this.value">
+            <option value="en" {% if lang == 'en' %}selected{% endif %}>English</option>
+            <option value="de" {% if lang == 'de' %}selected{% endif %}>Deutsch</option>
+          </select>
+        </form>
+        {% if user %}
+        <a href="{{ url_for('logout') }}" class="btn danger">{{ t('nav.logout') }}</a>
+        {% endif %}
+        <button class="btn secondary" type="button" onclick="toggleTheme()">🌓</button>
+      </div>
+      {% if user %}
+      <nav class="nav">
+        <a href="{{ url_for('dashboard') }}"><span>🏠</span><span>{{ t('nav.dashboard') }}</span></a>
+        <a href="{{ url_for('dashboard', media='audiobooks') }}"><span>📚</span><span>{{ t('nav.audiobooks') }}</span></a>
+        <a href="{{ url_for('dashboard', media='podcasts') }}"><span>🎙️</span><span>{{ t('nav.podcasts') }}</span></a>
+        <a href="{{ url_for('sync_settings') }}"><span>⚙️</span><span>{{ t('nav.sync') }}</span></a>
+      </nav>
+      {% endif %}
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+  </div>
+  <script>
+    (function() {
+      try {
+        const saved = localStorage.getItem('abshelflife-theme');
+        if (saved === 'dark' || saved === 'light') {
+          document.documentElement.setAttribute('data-theme', saved);
+        }
+      } catch (e) {}
+    })();
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      try { localStorage.setItem('abshelflife-theme', next); } catch (e) {}
+    }
+  </script>
+</body>
+</html>

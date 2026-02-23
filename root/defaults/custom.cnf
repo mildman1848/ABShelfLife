@@ -1,0 +1,9 @@
+[mysqld]
+bind-address=0.0.0.0
+port=3306
+character-set-server=utf8mb4
+collation-server=utf8mb4_unicode_ci
+skip-name-resolve
+
+[client]
+default-character-set=utf8mb4

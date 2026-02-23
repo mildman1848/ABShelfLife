@@ -1,0 +1,77 @@
+---
+services:
+  abshelflife:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ${CONTAINER_NAME:-abshelflife}
+    environment:
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
+      - TZ=${TZ:-Etc/UTC}
+      - ABS_TARGETS_FILE=${ABS_TARGETS_FILE:-/config/app/targets.json}
+      - ABS_SYNC_TRIGGER_FILE=${ABS_SYNC_TRIGGER_FILE:-/config/app/run-now.trigger}
+      - ABS_SYNC_INTERVAL_SECONDS=${ABS_SYNC_INTERVAL_SECONDS:-300}
+      - ABS_SYNC_PUSH_BATCH_SIZE=${ABS_SYNC_PUSH_BATCH_SIZE:-100}
+      - ABS_SYNC_MAX_RETRIES=${ABS_SYNC_MAX_RETRIES:-5}
+      - ABS_ENABLE_LOCAL_PRECEDENCE=${ABS_ENABLE_LOCAL_PRECEDENCE:-0}
+      - ABS_LOCAL_PUSH_THRESHOLD_MS=${ABS_LOCAL_PUSH_THRESHOLD_MS:-30000}
+      - ABS_ENABLE_CROSS_SERVER_MARK_SYNC=${ABS_ENABLE_CROSS_SERVER_MARK_SYNC:-1}
+      - ABS_MATCH_PRIORITY=${ABS_MATCH_PRIORITY:-asin,isbn,title_author_duration}
+      - ABS_ENABLE_LIBRARY_INDEX=${ABS_ENABLE_LIBRARY_INDEX:-1}
+      - ABS_LIBRARY_INDEX_INTERVAL_SECONDS=${ABS_LIBRARY_INDEX_INTERVAL_SECONDS:-21600}
+      - ABS_LIBRARY_INDEX_PAGE_SIZE=${ABS_LIBRARY_INDEX_PAGE_SIZE:-200}
+      - ABS_DB_NAME=${ABS_DB_NAME:-abshelflife}
+      - ABS_DB_USER=${ABS_DB_USER:-abshelflife}
+      - FILE__ABS_DB_PASSWORD=${ABS_DB_PASSWORD_FILE:-/run/secrets/abs_db_password}
+      - FILE__MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD_FILE:-/run/secrets/mysql_root_password}
+      - BACKUP_DIR=/config/backups
+      - BACKUP_RETENTION_DAYS=${BACKUP_RETENTION_DAYS:-14}
+    volumes:
+      - ${ABS_CONFIG_PATH:-./runtime/config}:/config
+      - ${ABS_BACKUPS_PATH:-./runtime/backups}:/config/backups
+    ports:
+      - "${ABS_DB_PORT_PUBLISH:-3306}:3306"
+    secrets:
+      - abs_db_password
+      - mysql_root_password
+    restart: ${RESTART_POLICY:-unless-stopped}
+
+  history-ui:
+    profiles: ["ui"]
+    build:
+      context: ./ui/history-ui
+      dockerfile: Dockerfile
+    container_name: ${HISTORY_UI_CONTAINER_NAME:-abshelflife-ui}
+    environment:
+      - DB_HOST=abshelflife
+      - DB_PORT=3306
+      - DB_NAME=${ABS_DB_NAME:-abshelflife}
+      - DB_USER=${ABS_DB_USER:-abshelflife}
+      - DB_PASSWORD_FILE=/run/secrets/abs_db_password
+      - TARGETS_FILE=${ABS_TARGETS_FILE:-/config/app/targets.json}
+      - MANUAL_SYNC_TRIGGER_FILE=${ABS_SYNC_TRIGGER_FILE:-/config/app/run-now.trigger}
+      - ABS_SYNC_INTERVAL_SECONDS_DEFAULT=${ABS_SYNC_INTERVAL_SECONDS:-300}
+      - UI_SECRET_KEY=${UI_SECRET_KEY:-change-me}
+      - UI_TOKEN_ENCRYPTION_KEY_FILE=${UI_TOKEN_ENCRYPTION_KEY_FILE:-/run/secrets/ui_token_encryption_key}
+      - AUDIBLE_API_BASE_URL=${AUDIBLE_API_BASE_URL:-https://api.audible.com}
+      - AUDIBLE_MARKETPLACE=${AUDIBLE_MARKETPLACE:-us}
+      - AUDIBLE_API_BEARER_TOKEN=${AUDIBLE_API_BEARER_TOKEN:-}
+    ports:
+      - "${HISTORY_UI_PORT:-8080}:8080"
+    volumes:
+      - ${ABS_CONFIG_PATH:-./runtime/config}:/config
+    depends_on:
+      - abshelflife
+    secrets:
+      - abs_db_password
+      - ui_token_encryption_key
+    restart: ${RESTART_POLICY:-unless-stopped}
+
+secrets:
+  abs_db_password:
+    file: ${ABS_SECRETS_PATH:-./secrets}/abs_db_password.txt
+  mysql_root_password:
+    file: ${ABS_SECRETS_PATH:-./secrets}/mysql_root_password.txt
+  ui_token_encryption_key:
+    file: ${ABS_SECRETS_PATH:-./secrets}/ui_token_encryption_key.txt

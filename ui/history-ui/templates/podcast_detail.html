@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <h2>🎙️ {{ t('podcast.overview') }}</h2>
+  <div class="book-card">
+    <a class="book-cover-wrap" href="{{ url_for('open_next_podcast_episode', target_id=podcast.target_id, library_item_id=podcast.library_item_id) }}" target="_blank" rel="noopener noreferrer">
+      {% if podcast.image_url %}
+      <img class="book-cover" src="{{ podcast.image_url }}" alt="{{ podcast.title }}" loading="lazy" referrerpolicy="no-referrer">
+      {% else %}
+      <div class="book-cover-fallback">{{ podcast.title[:1]|upper }}</div>
+      {% endif %}
+    </a>
+    <div class="book-meta">
+      <h4>{{ podcast.title }}</h4>
+      <p><strong>{{ t('field.author') }}:</strong> {{ podcast.author or t('common.none') }}</p>
+      <p><strong>iTunes:</strong> {{ podcast.itunes_id or t('common.none') }}</p>
+      <p><a href="{{ url_for('dashboard', media='podcasts') }}">{{ t('podcast.back') }}</a></p>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <h3>📚 {{ t('podcast.episodes') }}</h3>
+  <div class="actions" style="margin-bottom:10px;">
+    {% if only_unheard %}
+    <a class="btn secondary" href="{{ url_for('podcast_detail', target_id=podcast.target_id, library_item_id=podcast.library_item_id) }}">{{ t('action.show_all_episodes') }}</a>
+    {% else %}
+    <a class="btn" href="{{ url_for('podcast_detail', target_id=podcast.target_id, library_item_id=podcast.library_item_id, filter='unheard') }}">{{ t('action.show_unheard') }}</a>
+    {% endif %}
+  </div>
+  {% if episodes %}
+  <table>
+    <thead>
+      <tr>
+        <th>{{ t('field.episode') }}</th>
+        <th>{{ t('field.title') }}</th>
+        <th>{{ t('field.published') }}</th>
+        <th>{{ t('field.abs_presence') }}</th>
+        <th>{{ t('field.progress') }}</th>
+        <th>{{ t('field.status') }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for ep in episodes %}
+      <tr>
+        <td>{{ ep.episode_no if ep.episode_no else t('common.none') }}</td>
+        <td>{{ ep.episode_title }}</td>
+        <td>{{ ep.published_at if ep.published_at else t('common.none') }}</td>
+        <td>{{ t('presence.' + (ep.abs_presence or 'missing')) }}</td>
+        <td>{{ '%.1f'|format(ep.progress_pct) }}%</td>
+        <td>{{ t('status.' + ep.status) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="muted">{{ t('message.no_podcast_episodes') }}</p>
+  {% endif %}
+</div>
+{% endblock %}

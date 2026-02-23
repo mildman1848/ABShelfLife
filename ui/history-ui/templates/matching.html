@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <h2>🧩 {{ t('section.matching') }}</h2>
+  <p class="muted">{{ t('matching.subtitle') }}</p>
+  <form method="post" class="grid grid-2">
+    <div>
+      <label>{{ t('matching.source_item') }}</label>
+      <select name="source_item" required>
+        <option value="">{{ t('common.none') }}</option>
+        {% for r in unmatched_rows %}
+        <option value="{{ r.value_key }}">{{ r.title }} · {{ r.author or t('common.none') }} · {{ r.target_id }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label>{{ t('matching.reference_item') }}</label>
+      <select name="reference_item" required>
+        <option value="">{{ t('common.none') }}</option>
+        {% for r in matched_rows %}
+        <option value="{{ r.value_key }}">{{ r.title }} · {{ r.author or t('common.none') }} · {{ r.target_id }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label>&nbsp;</label>
+      <button class="btn" type="submit">{{ t('action.match_now') }}</button>
+    </div>
+  </form>
+</div>
+
+<div class="card">
+  <h3>📕 {{ t('matching.unmatched') }}</h3>
+  {% if unmatched_rows %}
+  <table>
+    <thead>
+      <tr>
+        <th>{{ t('field.title') }}</th>
+        <th>{{ t('field.author') }}</th>
+        <th>{{ t('field.series') }}</th>
+        <th>{{ t('field.asin') }}</th>
+        <th>ISBN</th>
+        <th>{{ t('field.collection_status') }}</th>
+        <th>Target</th>
+        <th>{{ t('matching.abs_links') }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in unmatched_rows %}
+      <tr>
+        <td>{{ r.title }}</td>
+        <td>{{ r.author or t('common.none') }}</td>
+        <td>{{ r.series_name or t('common.none') }}</td>
+        <td>{{ r.asin or t('common.none') }}</td>
+        <td>{{ r.isbn or t('common.none') }}</td>
+        <td>{{ t('collection.' + (r.collection_status or 'collected')) }}</td>
+        <td>{{ r.target_id }}</td>
+        <td>
+          {% if r.abs_url %}
+          <a href="{{ r.abs_url }}" target="_blank" rel="noopener noreferrer">{{ t('action.open_abs') }}</a>
+          {% else %}
+          {{ t('common.none') }}
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="muted">{{ t('message.no_unmatched') }}</p>
+  {% endif %}
+</div>
+{% endblock %}

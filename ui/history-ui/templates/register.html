@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card" style="max-width:520px;margin:40px auto;">
+  <h2>{% if first_user %}Create Admin User{% else %}Create User{% endif %}</h2>
+  <form method="post" class="grid">
+    <div>
+      <label>Username</label>
+      <input name="username" minlength="3" required>
+    </div>
+    <div>
+      <label>Password</label>
+      <input name="password" type="password" minlength="8" required>
+    </div>
+    <div><button type="submit">Create Account</button></div>
+  </form>
+  <p class="muted"><a href="{{ url_for('login') }}">Back to login</a></p>
+</div>
+{% endblock %}

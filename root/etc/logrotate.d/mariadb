@@ -1,0 +1,9 @@
+/config/log/mysql/*.log {
+  daily
+  rotate 7
+  missingok
+  notifempty
+  compress
+  delaycompress
+  copytruncate
+}

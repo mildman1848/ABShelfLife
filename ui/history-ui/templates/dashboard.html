@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <h2>🏠 {{ t('dashboard.title') }}</h2>
+  <p class="muted">{{ t('dashboard.subtitle') }}</p>
+  <div class="stats-grid">
+    <div class="stat"><strong>{{ sync_category_counts.get('completed', 0) }}</strong><span>{{ t('stats.completed') }}</span></div>
+    <div class="stat"><strong>{{ sync_category_counts.get('in_progress', 0) }}</strong><span>{{ t('stats.in_progress') }}</span></div>
+    <div class="stat"><strong>{{ collected_books|length }}</strong><span>{{ t('stats.audiobooks') }}</span></div>
+    <div class="stat"><strong>{{ podcasts|length }}</strong><span>{{ t('section.podcasts') }}</span></div>
+    <div class="stat"><strong>{{ podcast_episode_total }}</strong><span>{{ t('stats.podcast_episodes') }}</span></div>
+  </div>
+</div>
+
+{% if media_view == 'home' %}
+<div class="card">
+  <h3>▶️ {{ t('section.home_continue') }}</h3>
+  {% if home_continue %}
+  <div class="books-grid">
+    {% for b in home_continue %}
+    <article class="book-card">
+      <a class="book-cover-wrap" href="{{ url_for('open_abs_item', target_id=b.target_id, library_item_id=b.library_item_id) }}" target="_blank" rel="noopener noreferrer">
+        {% if b.cover_url %}
+        <img class="book-cover" src="{{ b.cover_url }}" alt="{{ b.title }}" loading="lazy" referrerpolicy="no-referrer">
+        {% else %}
+        <div class="book-cover-fallback">{{ b.title[:1]|upper }}</div>
+        {% endif %}
+      </a>
+      <div class="book-meta">
+        <h4>{{ b.title }}</h4>
+        <p><strong>{{ t('field.author') }}:</strong> {{ b.author or t('common.none') }}</p>
+        <p><strong>{{ t('field.progress') }}:</strong> {{ '%.1f'|format(b.progress_pct) }}%</p>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}<p class="muted">{{ t('common.none') }}</p>{% endif %}
+  <h3 style="margin-top:14px;">📚 {{ t('section.home_series_next') }}</h3>
+  {% if home_next_series_books %}
+  <div class="books-grid">
+    {% for b in home_next_series_books %}
+    <article class="book-card">
+      <a class="book-cover-wrap" href="{{ url_for('open_abs_item', target_id=b.target_id, library_item_id=b.library_item_id) }}" target="_blank" rel="noopener noreferrer">
+        {% if b.cover_url %}
+        <img class="book-cover" src="{{ b.cover_url }}" alt="{{ b.title }}" loading="lazy" referrerpolicy="no-referrer">
+        {% else %}
+        <div class="book-cover-fallback">{{ b.title[:1]|upper }}</div>
+        {% endif %}
+      </a>
+      <div class="book-meta">
+        <h4>{{ b.title }}</h4>
+        <p><strong>{{ t('field.series') }}:</strong> {{ b.series_name or t('common.none') }}</p>
+        <p><strong>{{ t('field.author') }}:</strong> {{ b.author or t('common.none') }}</p>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}<p class="muted">{{ t('common.none') }}</p>{% endif %}
+
+  <h3 style="margin-top:14px;">🎙️ {{ t('section.home_podcasts_next') }}</h3>
+  {% if home_next_podcast_episodes %}
+  <div class="books-grid">
+    {% for ep in home_next_podcast_episodes %}
+    <a class="book-card" href="{{ url_for('podcast_detail', target_id=ep.target_id, library_item_id=ep.library_item_id) }}" style="text-decoration:none;color:inherit;">
+      <div class="book-cover-wrap" onclick="event.preventDefault();event.stopPropagation();window.open('{{ url_for('open_next_podcast_episode', target_id=ep.target_id, library_item_id=ep.library_item_id) }}','_blank','noopener');" style="cursor:pointer;">
+        {% if ep.image_url %}
+        <img class="book-cover" src="{{ ep.image_url }}" alt="{{ ep.podcast_title }}" loading="lazy" referrerpolicy="no-referrer">
+        {% else %}
+        <div class="book-cover-fallback">{{ ep.podcast_title[:1]|upper }}</div>
+        {% endif %}
+      </div>
+      <div class="book-meta">
+        <h4>{{ ep.podcast_title }}</h4>
+        <p><strong>{{ t('podcast.next_episode') }}:</strong> {{ ep.episode_title }}</p>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}<p class="muted">{{ t('common.none') }}</p>{% endif %}
+</div>
+
+<div class="card">
+  <h3>✅ {{ t('section.home_completed') }}</h3>
+  {% if home_completed %}
+  <div class="books-grid">
+    {% for b in home_completed %}
+    <article class="book-card">
+      <a class="book-cover-wrap" href="{{ url_for('open_abs_item', target_id=b.target_id, library_item_id=b.library_item_id) }}" target="_blank" rel="noopener noreferrer">
+        {% if b.cover_url %}
+        <img class="book-cover" src="{{ b.cover_url }}" alt="{{ b.title }}" loading="lazy" referrerpolicy="no-referrer">
+        {% else %}
+        <div class="book-cover-fallback">{{ b.title[:1]|upper }}</div>
+        {% endif %}
+      </a>
+      <div class="book-meta">
+        <h4>{{ b.title }}</h4>
+        <p><strong>{{ t('field.author') }}:</strong> {{ b.author or t('common.none') }}</p>
+        <p><strong>{{ t('field.asin') }}:</strong> {{ b.asin or t('common.none') }}</p>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}<p class="muted">{{ t('common.none') }}</p>{% endif %}
+</div>
+
+<div class="card">
+  <h3>📖 {{ t('section.home_collected') }}</h3>
+  {% if home_collected %}
+  <div class="books-grid">
+    {% for b in home_collected %}
+    <article class="book-card">
+      <a class="book-cover-wrap" href="{{ url_for('open_abs_item', target_id=b.target_id, library_item_id=b.library_item_id) }}" target="_blank" rel="noopener noreferrer">
+        {% if b.cover_url %}
+        <img class="book-cover" src="{{ b.cover_url }}" alt="{{ b.title }}" loading="lazy" referrerpolicy="no-referrer">
+        {% else %}
+        <div class="book-cover-fallback">{{ b.title[:1]|upper }}</div>
+        {% endif %}
+      </a>
+      <div class="book-meta">
+        <h4>{{ b.title }}</h4>
+        <p><strong>{{ t('field.author') }}:</strong> {{ b.author or t('common.none') }}</p>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}<p class="muted">{{ t('common.none') }}</p>{% endif %}
+</div>
+
+<div class="card">
+  <h3>🎙️ {{ t('section.home_podcasts') }}</h3>
+  {% if home_podcasts %}
+  <div class="books-grid">
+    {% for p in home_podcasts %}
+    <article class="book-card">
+      <a class="book-cover-wrap" href="{{ url_for('open_next_podcast_episode', target_id=p.target_id, library_item_id=p.library_item_id) }}" target="_blank" rel="noopener noreferrer">
+        {% if p.image_url %}
+        <img class="book-cover" src="{{ p.image_url }}" alt="{{ p.title }}" loading="lazy" referrerpolicy="no-referrer">
+        {% else %}
+        <div class="book-cover-fallback">{{ p.title[:1]|upper }}</div>
+        {% endif %}
+      </a>
+      <div class="book-meta">
+        <h4>{{ p.title }}</h4>
+        <p><strong>{{ t('podcast.next_episode') }}:</strong> {{ p.next_episode }}</p>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}<p class="muted">{{ t('common.none') }}</p>{% endif %}
+</div>
+{% endif %}
+
+{% if media_view == 'audiobooks' %}
+<div class="card">
+  <h3>📚 {{ t('section.audiobooks') }}</h3>
+  {% if collected_books_sorted %}
+  <div class="books-grid">
+    {% for b in collected_books_sorted %}
+    <article class="book-card">
+      <a class="book-cover-wrap" href="{{ url_for('open_abs_item', target_id=b.target_id, library_item_id=b.library_item_id) }}" target="_blank" rel="noopener noreferrer">
+        {% if b.cover_url %}
+        <img class="book-cover" src="{{ b.cover_url }}" alt="{{ b.title }}" loading="lazy" referrerpolicy="no-referrer">
+        {% else %}
+        <div class="book-cover-fallback">{{ b.title[:1]|upper }}</div>
+        {% endif %}
+      </a>
+      <div class="book-meta">
+        <h4>{{ b.title }}</h4>
+        <p><strong>{{ t('field.author') }}:</strong> {{ b.author or t('common.none') }}</p>
+        <p><strong>{{ t('field.series') }}:</strong> {{ b.series_name or t('common.none') }}</p>
+        <p><strong>{{ t('field.year') }}:</strong> {{ b.published_year if b.published_year else t('common.none') }}</p>
+        <p><strong>{{ t('field.asin') }}:</strong> {{ b.asin or t('common.none') }}</p>
+        <p><strong>{{ t('field.collection_status') }}:</strong> {{ t('collection.' + (b.collection_status or 'collected')) }}</p>
+        <p><strong>{{ t('field.listening_status') }}:</strong> {{ t('status.' + (b.listening_status or 'not_started')) }}</p>
+        <div class="actions">
+          <form method="post" action="{{ url_for('mark_synced_heard') }}">
+            <input type="hidden" name="target_id" value="{{ b.target_id }}">
+            <input type="hidden" name="library_item_id" value="{{ b.library_item_id }}">
+            <button class="btn" type="submit">{{ t('action.mark_heard') }}</button>
+          </form>
+          <form method="post" action="{{ url_for('mark_synced_unheard') }}">
+            <input type="hidden" name="target_id" value="{{ b.target_id }}">
+            <input type="hidden" name="library_item_id" value="{{ b.library_item_id }}">
+            <button class="btn secondary" type="submit">{{ t('action.mark_unheard') }}</button>
+          </form>
+        </div>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="muted">{{ t('message.no_collected') }}</p>
+  {% endif %}
+</div>
+{% endif %}
+
+{% if media_view == 'podcasts' %}
+<div class="card">
+  <h3>🎙️ {{ t('section.podcasts') }}</h3>
+  {% if podcasts %}
+  <div class="books-grid">
+    {% for p in podcasts %}
+    <a class="book-card" href="{{ url_for('podcast_detail', target_id=p.target_id, library_item_id=p.library_item_id) }}" style="text-decoration:none;color:inherit;">
+      <div class="book-cover-wrap" onclick="event.preventDefault();event.stopPropagation();window.open('{{ url_for('open_next_podcast_episode', target_id=p.target_id, library_item_id=p.library_item_id) }}','_blank','noopener');" style="cursor:pointer;">
+        {% if p.image_url %}
+        <img class="book-cover" src="{{ p.image_url }}" alt="{{ p.title }}" loading="lazy" referrerpolicy="no-referrer">
+        {% else %}
+        <div class="book-cover-fallback">{{ p.title[:1]|upper }}</div>
+        {% endif %}
+      </div>
+      <div class="book-meta">
+        <h4>{{ p.title }}</h4>
+        <p><strong>{{ t('field.author') }}:</strong> {{ p.author or t('common.none') }}</p>
+        <p><strong>{{ t('podcast.next_episode') }}:</strong> {{ p.next_episode }}</p>
+        <p><strong>{{ t('podcast.open') }}:</strong> {{ t('podcast.episodes') }}</p>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="muted">{{ t('message.no_podcasts') }}</p>
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}

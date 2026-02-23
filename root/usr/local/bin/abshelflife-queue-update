@@ -1,0 +1,60 @@
+#!/usr/bin/with-contenv bash
+# shellcheck shell=bash
+set -euo pipefail
+
+ABS_DB_NAME="${ABS_DB_NAME:-abshelflife}"
+ABS_DB_USER="${ABS_DB_USER:-abshelflife}"
+ABS_DB_PASSWORD="${ABS_DB_PASSWORD:-}"
+DB_HOST="${ABS_DB_HOST:-127.0.0.1}"
+DB_PORT="${ABS_DB_PORT:-3306}"
+
+TARGET_ID="${ABS_QUEUE_TARGET_ID:-default}"
+SERVER_ID="${ABS_QUEUE_SERVER_ID:-default}"
+PRINCIPAL_ID="${ABS_QUEUE_PRINCIPAL_ID:-default}"
+USER_ID="${ABS_QUEUE_USER_ID:-}"
+LIBRARY_ITEM_ID="${ABS_QUEUE_LIBRARY_ITEM_ID:-}"
+EPISODE_ID="${ABS_QUEUE_EPISODE_ID:-}"
+CANONICAL_KEY="${ABS_QUEUE_CANONICAL_KEY:-}"
+PROGRESS="${ABS_QUEUE_PROGRESS:-0}"
+CURRENT_TIME="${ABS_QUEUE_CURRENT_TIME:-0}"
+DURATION="${ABS_QUEUE_DURATION:-0}"
+IS_FINISHED="${ABS_QUEUE_IS_FINISHED:-0}"
+LAST_UPDATE_MS="${ABS_QUEUE_LAST_UPDATE_MS:-$(( $(date +%s) * 1000 ))}"
+
+if [[ -z "$USER_ID" || -z "$LIBRARY_ITEM_ID" ]]; then
+  echo "usage via env: ABS_QUEUE_USER_ID and ABS_QUEUE_LIBRARY_ITEM_ID are required"
+  echo "optional: ABS_QUEUE_TARGET_ID ABS_QUEUE_SERVER_ID ABS_QUEUE_PRINCIPAL_ID ABS_QUEUE_EPISODE_ID ABS_QUEUE_CANONICAL_KEY ABS_QUEUE_PROGRESS ABS_QUEUE_CURRENT_TIME ABS_QUEUE_DURATION ABS_QUEUE_IS_FINISHED ABS_QUEUE_LAST_UPDATE_MS"
+  exit 1
+fi
+
+sql_escape() {
+  printf "%s" "$1" | sed "s/'/''/g"
+}
+
+e_target="$(sql_escape "$TARGET_ID")"
+e_server="$(sql_escape "$SERVER_ID")"
+e_principal="$(sql_escape "$PRINCIPAL_ID")"
+e_user="$(sql_escape "$USER_ID")"
+e_li="$(sql_escape "$LIBRARY_ITEM_ID")"
+e_ep="$(sql_escape "$EPISODE_ID")"
+e_ck="$(sql_escape "$CANONICAL_KEY")"
+
+MYSQL_BIN=(mariadb -N -B -h "${DB_HOST}" -P "${DB_PORT}" -u "${ABS_DB_USER}")
+if [[ -n "${ABS_DB_PASSWORD}" ]]; then
+  MYSQL_BIN+=("-p${ABS_DB_PASSWORD}")
+fi
+MYSQL_BIN+=("${ABS_DB_NAME}")
+
+"${MYSQL_BIN[@]}" -e "
+INSERT INTO progress_outbox (
+  target_id, server_id, principal_id, user_id, library_item_id, episode_id, canonical_key,
+  progress, current_time_sec, duration, is_finished, last_update_ms,
+  status, attempts
+) VALUES (
+  '${e_target}', '${e_server}', '${e_principal}', '${e_user}', '${e_li}', '${e_ep}', NULLIF('${e_ck}',''),
+  ${PROGRESS}, ${CURRENT_TIME}, ${DURATION}, ${IS_FINISHED}, ${LAST_UPDATE_MS},
+  'pending', 0
+);
+"
+
+echo "queued update for target=${TARGET_ID} principal=${PRINCIPAL_ID} user=${USER_ID} item=${LIBRARY_ITEM_ID}${EPISODE_ID:+/${EPISODE_ID}}"

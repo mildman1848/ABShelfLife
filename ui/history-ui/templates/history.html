@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <h2>🕘 {{ t('history.title') }}</h2>
+  <table>
+    <thead>
+      <tr><th>{{ t('field.title') }}</th><th>{{ t('field.author') }}</th><th>{{ t('field.asin') }}</th><th>{{ t('field.progress') }}</th><th>{{ t('field.status') }}</th></tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}
+      <tr>
+        <td>{{ r.title or r.library_item_id }}</td>
+        <td>{{ r.author or t('common.none') }}</td>
+        <td>{{ r.asin or t('common.none') }}</td>
+        <td>{{ '%.1f'|format((r.progress or 0) * 100) }}%</td>
+        <td>{% if r.is_finished %}<span class="pill ok">{{ t('status.completed') }}</span>{% elif (r.progress or 0) > 0 %}<span class="pill no">{{ t('status.in_progress') }}</span>{% else %}<span class="pill no">{{ t('status.not_started') }}</span>{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

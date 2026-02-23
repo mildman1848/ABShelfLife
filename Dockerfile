@@ -1,0 +1,43 @@
+# syntax=docker/dockerfile:1
+
+FROM ghcr.io/linuxserver/baseimage-alpine:3.22
+
+# set version label
+ARG BUILD_DATE
+ARG VERSION
+LABEL build_version="ABShelfLife version:- ${VERSION} Build-date:- ${BUILD_DATE}"
+LABEL maintainer="abshelflife"
+
+# environment variables
+ENV MYSQL_DIR="/config" \
+    DATADIR="/config/databases" \
+    ABS_CONFIG_DIR="/config/app" \
+    LSIO_FIRST_PARTY="false"
+
+RUN \
+  echo "**** install runtime packages ****" && \
+  apk add --no-cache \
+    bash \
+    ca-certificates \
+    curl \
+    jq \
+    logrotate \
+    mariadb \
+    mariadb-backup \
+    mariadb-client \
+    mariadb-common \
+    mariadb-server-utils \
+    netcat-openbsd && \
+  printf "ABShelfLife version: %s\nBuild-date: %s\n" "${VERSION}" "${BUILD_DATE}" > /build_version && \
+  echo "**** cleanup ****" && \
+  rm -rf \
+    /tmp/* \
+    "$HOME/.cache"
+
+# copy local files
+COPY root/ /
+
+# ports and volumes
+EXPOSE 3306
+
+VOLUME /config

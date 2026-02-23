@@ -1,0 +1,57 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors / IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+logs/
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+.env\ copy.example
+*.secret
+secrets/*.txt
+secrets/backup-*/
+!secrets/*.example
+!secrets/.gitkeep
+.weblate.ini
+
+# Runtime data
+runtime/config/*
+!runtime/config/.gitkeep
+runtime/backups/*
+!runtime/backups/.gitkeep
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.venv/
+venv/
+
+# Node
+node_modules/
+
+# Build / temp
+build/
+dist/
+.tmp/
+tmp/
+.cache/
+
+# Docker / local runtime data
+*.pid
+*.sock
+backups/
+data/
