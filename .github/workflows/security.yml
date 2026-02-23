@@ -52,7 +52,7 @@ jobs:
           tags: local/abshelflife:scan
 
       - name: Trivy image SARIF
-        uses: aquasecurity/trivy-action@0.33.1
+        uses: aquasecurity/trivy-action@0.34.1
         with:
           image-ref: local/abshelflife:scan
           format: sarif
@@ -68,7 +68,7 @@ jobs:
           category: trivy-image
 
       - name: Trivy fs SARIF
-        uses: aquasecurity/trivy-action@0.33.1
+        uses: aquasecurity/trivy-action@0.34.1
         with:
           scan-type: fs
           scan-ref: .
