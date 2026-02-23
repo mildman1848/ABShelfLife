@@ -25,7 +25,7 @@ jobs:
           no-fail: true
 
       - name: Upload Hadolint SARIF
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         if: always()
         with:
           sarif_file: hadolint-results.sarif
@@ -61,7 +61,7 @@ jobs:
           exit-code: '0'
 
       - name: Upload Trivy image SARIF
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         if: always()
         with:
           sarif_file: trivy-image.sarif
@@ -78,7 +78,7 @@ jobs:
           exit-code: '0'
 
       - name: Upload Trivy fs SARIF
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         if: always()
         with:
           sarif_file: trivy-fs.sarif
