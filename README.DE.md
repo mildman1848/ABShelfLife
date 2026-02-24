@@ -11,7 +11,7 @@
 [![Hadolint](https://img.shields.io/github/actions/workflow/status/mildman1848/ABShelfLife/hadolint.yml?branch=main&style=flat-square&logo=docker&label=Hadolint)](https://github.com/mildman1848/ABShelfLife/actions/workflows/hadolint.yml)
 [![Security Scan](https://img.shields.io/github/actions/workflow/status/mildman1848/ABShelfLife/security.yml?branch=main&style=flat-square&logo=github&label=Security)](https://github.com/mildman1848/ABShelfLife/actions/workflows/security.yml)
 [![Docker Release](https://img.shields.io/github/actions/workflow/status/mildman1848/ABShelfLife/docker-release.yml?branch=main&style=flat-square&logo=docker&label=Release)](https://github.com/mildman1848/ABShelfLife/actions/workflows/docker-release.yml)
-[![Version](https://img.shields.io/badge/version-v0.1.0-blue?style=flat-square&logo=github)](VERSION)
+[![Version](https://img.shields.io/badge/version-v0.1.1-blue?style=flat-square&logo=github)](VERSION)
 
 ---
 

@@ -7,6 +7,17 @@ All notable changes to this project are documented in this file.
 ## [Unreleased]
 
 ### Added
+- _No entries yet._
+
+### Changed
+- _No entries yet._
+
+### Fixed
+- _No entries yet._
+
+## [0.1.1] - 2026-02-24
+
+### Added
 - Manual "Rebuild Progress from ABS" action in Sync settings.
 - Manual "Clean Collected Library" action in Sync settings.
 - Dedicated Hadolint configuration (`.hadolint.yaml`) and workflow (`.github/workflows/hadolint.yml`) for all Dockerfiles.
@@ -21,11 +32,13 @@ All notable changes to this project are documented in this file.
 - Navigation reduced to `Home`, `Audiobooks`, `Podcasts`, `Settings` (history removed from top menu).
 - Deployment defaults now rely on UI-managed ABS accounts and `targets.json`.
 - Docker release workflow now publishes only the single image `abshelflife`.
+- Docker release workflow now supports both manual dispatch and tag-push triggers (`v*`).
 - CI/Security/Hadolint pipelines validate single-container Dockerfiles only.
 - Make defaults use `abshelflife` and single-container compose flows only.
 - Legacy multi-container compose services (`abshelflife-db`, `abshelflife-ui`) and legacy Dockerfiles were removed from active maintenance paths.
 - Weblate/Crowdin integration files and references were removed from the repository.
 - `permissions.yml` now performs executable permission checks for init/service scripts via LSIO reusable workflow.
+- Sync Security Policy workflow YAML was fixed so scheduled/push runs execute correctly.
 
 ### Fixed
 - Sync settings form nesting issue (`cancel edit` no longer uses nested `<form>`).

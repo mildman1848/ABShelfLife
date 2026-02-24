@@ -1,6 +1,9 @@
 name: Docker Release
 
 on:
+  push:
+    tags:
+      - 'v*'
   workflow_dispatch:
     inputs:
       tag:
@@ -47,17 +50,24 @@ jobs:
       - name: Prepare tags
         id: prep
         run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            TAG_INPUT="${GITHUB_REF_NAME}"
+            PUSH_LATEST="true"
+          else
+            TAG_INPUT="${{ inputs.tag }}"
+            PUSH_LATEST="${{ inputs.push_latest }}"
+          fi
+
           if [ -n "${{ secrets.DOCKERHUB_SINGLE_REPOSITORY }}" ]; then
             DOCKERHUB_IMAGE="docker.io/${{ secrets.DOCKERHUB_SINGLE_REPOSITORY }}"
           else
             DOCKERHUB_IMAGE="docker.io/${{ github.repository_owner }}/abshelflife"
           fi
           GHCR_IMAGE="ghcr.io/${{ github.repository_owner }}/abshelflife"
-          TAG_INPUT="${{ inputs.tag }}"
           VERSION_FILE=$(cat VERSION | tr -d '\n\r')
 
           TAGS="${DOCKERHUB_IMAGE}:${TAG_INPUT},${GHCR_IMAGE}:${TAG_INPUT},${DOCKERHUB_IMAGE}:${VERSION_FILE},${GHCR_IMAGE}:${VERSION_FILE}"
-          if [ "${{ inputs.push_latest }}" = "true" ]; then
+          if [ "${PUSH_LATEST}" = "true" ]; then
             TAGS="${TAGS},${DOCKERHUB_IMAGE}:latest,${GHCR_IMAGE}:latest"
           fi
           echo "tags=${TAGS}" >> "$GITHUB_OUTPUT"
