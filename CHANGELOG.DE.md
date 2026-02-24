@@ -1,17 +1,17 @@
-# Aenderungsprotokoll
+# Änderungsprotokoll
 
-Alle relevanten Aenderungen dieses Projekts werden in dieser Datei dokumentiert.
+Alle maßgeblichen Änderungen dieses Projekts werden in dieser Datei dokumentiert.
 
-## [Unveroeffentlicht]
+## [Unveröffentlicht]
 
-### Hinzugefuegt
+### Hinzugefügt
 - Manuelle Aktion "Fortschritt aus ABS neu einlesen" in den Sync-Einstellungen.
 - Manuelle Aktion "Gesammelte Bibliothek bereinigen" in den Sync-Einstellungen.
 
-### Geaendert
-- Darkmode-Kontrast fuer Navigation, Karten, Statistik-Widgets und Formulare ueberarbeitet.
+### Geändert
+- Darkmode-Kontrast für Navigation, Karten, Statistik-Widgets und Formulare überarbeitet.
 - Kopfzeilen-Titel auf `ABShelfLife` reduziert (ohne Tracker-Zusatz).
-- Navigation auf `Startseite`, `Hoerbuecher`, `Podcasts`, `Einstellungen` reduziert (Verlauf aus dem Top-Menue entfernt).
+- Navigation auf `Startseite`, `Hörbücher`, `Podcasts`, `Einstellungen` reduziert (Verlauf aus dem Top-Menü entfernt).
 - Deployment-Defaults setzen nun auf UI-verwaltete ABS-Konten und `targets.json`.
 
 ### Behoben
@@ -20,26 +20,26 @@ Alle relevanten Aenderungen dieses Projekts werden in dieser Datei dokumentiert.
 
 ## [0.1.0] - 2026-02-23
 
-### Hinzugefuegt
+### Hinzugefügt
 - LinuxServer-orientierte Repository-Struktur (`Dockerfile`, `Dockerfile.aarch64`, `root/` auf Top-Level).
 - Aufgeteilte Doku-Dateien (`README.md`, `README.DE.md`, `CHANGELOG.md`, `CHANGELOG.DE.md`).
-- Optionaler History-UI-Service (`ui/history-ui`) zur Ansicht von Latest/History-Syncdaten.
-- Multi-Target-Sync-Basis fuer mehrere ABS-Server/-User in einem Container.
-- Kombiniertes Identitaetsmodell in der DB: `target_id + user_id + library_item_id + episode_id`.
+- Optionaler History-UI-Service (`ui/abshelflife-ui`) zur Ansicht von Latest/History-Syncdaten.
+- Multi-Target-Sync-Basis für mehrere ABS-Server/-User in einem Container.
+- Kombiniertes Identitätsmodell in der DB: `target_id + user_id + library_item_id + episode_id`.
 - Kanonischer Matching-Key (`ASIN` -> `ISBN` -> `title+author+duration`).
-- Zieluebergreifende Uebernahme von `isFinished` via kanonischem Key und gemeinsamer `principalId`.
-- Library-Identity-Index pro Target fuer Migrationsszenarien.
+- Zielübergreifende Übernahme von `isFinished` via kanonischem Key und gemeinsamer `principalId`.
+- Library-Identity-Index pro Target für Migrationsszenarien.
 - Automatisierungs-Basis: `Makefile` und `VERSION`.
 - Dependabot-Konfiguration (`.github/dependabot.yml`).
 - CI-Workflow (`.github/workflows/ci.yml`).
 - Security-Workflow (`.github/workflows/security.yml`).
-- Manueller Docker-Publish-Workflow fuer Docker Hub + GHCR (`.github/workflows/docker-release.yml`).
+- Manueller Docker-Publish-Workflow für Docker Hub + GHCR (`.github/workflows/docker-release.yml`).
 - Workflow-Permissions-Check (`.github/workflows/permissions.yml`).
 
-### Geaendert
+### Geändert
 - Docker-Compose- und Env-Templates auf Root-Ebene verschoben.
-- Sync-Engine unterstuetzt Target-Profile aus `/config/app/targets.json`.
-- Matching-Strategie ist ueber `ABS_MATCH_PRIORITY` konfigurierbar.
+- Sync-Engine unterstützt Target-Profile aus `/config/app/targets.json`.
+- Matching-Strategie ist über `ABS_MATCH_PRIORITY` konfigurierbar.
 
 ### Behoben
 - Atomares Backup-Schreiben (`.tmp` + move).

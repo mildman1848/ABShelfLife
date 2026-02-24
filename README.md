@@ -12,7 +12,7 @@ ABShelfLife is a LinuxServer-style Docker image for persistent Audiobookshelf hi
 - `FILE__` secrets support
 - local mount backups (`/config/backups`)
 - multi-target (multi server/user) sync support via UI-managed ABS accounts
-- optional read-only History UI (`history-ui` profile)
+- optional read-only ABShelfLife UI (`ui` profile, service `abshelflife-ui`)
 
 ## Repository Layout (LSIO-style)
 - `Dockerfile`
@@ -22,7 +22,7 @@ ABShelfLife is a LinuxServer-style Docker image for persistent Audiobookshelf hi
 - `.env.example`
 - `runtime/` (local dev bind mounts)
 - `secrets/` (local dev secret files)
-- `ui/history-ui/` (optional history frontend)
+- `ui/abshelflife-ui/` (optional history frontend)
 
 ## Quick Start
 ```bash
@@ -33,7 +33,7 @@ printf '%s' 'your-ui-token-encryption-key' > secrets/ui_token_encryption_key.txt
 docker compose -f docker-compose.example.yml up -d --build
 ```
 
-## Optional History UI
+## Optional ABShelfLife UI
 ```bash
 docker compose -f docker-compose.example.yml --profile ui up -d --build
 ```

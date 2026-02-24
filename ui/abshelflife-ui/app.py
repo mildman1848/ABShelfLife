@@ -271,7 +271,7 @@ def get_db_password() -> str:
 
 def get_conn():
     return pymysql.connect(
-        host=os.getenv("DB_HOST", "abshelflife"),
+        host=os.getenv("DB_HOST", "abshelflife-db"),
         port=int(os.getenv("DB_PORT", "3306")),
         user=os.getenv("DB_USER", "abshelflife"),
         password=get_db_password(),

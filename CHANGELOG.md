@@ -23,7 +23,7 @@ All notable changes to this project are documented in this file.
 ### Added
 - LinuxServer-style repository structure (`Dockerfile`, `Dockerfile.aarch64`, `root/` at top-level).
 - Split documentation files (`README.md`, `README.DE.md`, `CHANGELOG.md`, `CHANGELOG.DE.md`).
-- Optional History UI service (`ui/history-ui`) for browsing latest/history sync data.
+- Optional ABShelfLife UI service (`ui/abshelflife-ui`) for browsing latest/history sync data.
 - Multi-target sync foundation for multiple ABS servers/users in one container.
 - Composite identity model in DB: `target_id + user_id + library_item_id + episode_id`.
 - Canonical key matching bridge (`ASIN` -> `ISBN` -> `title+author+duration`).

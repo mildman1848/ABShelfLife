@@ -1,10 +1,18 @@
-.PHONY: help build build-aarch64 build-multiarch test validate security-scan push clean \
-        start stop restart status logs shell setup env-setup env-validate \
+.PHONY: help build build-aarch64 build-multiarch build-ui build-ui-aarch64 build-single build-single-aarch64 \
+        test validate security-scan push clean \
+        start start-ui start-single stop restart status logs shell shell-ui \
+        setup env-setup env-validate \
         secrets-generate secrets-generate-ci secrets-rotate secrets-clean secrets-info
 
 IMAGE_NAME ?= $(or $(DOCKERHUB_REPOSITORY),$(USER)/abshelflife)
+UI_IMAGE_NAME ?= $(or $(DOCKERHUB_UI_REPOSITORY),$(USER)/abshelflife-ui)
+SINGLE_IMAGE_NAME ?= $(or $(DOCKERHUB_SINGLE_REPOSITORY),$(USER)/abshelflife)
 VERSION := $(shell cat VERSION)
 BUILD_DATE := $(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
+COMPOSE_FILE ?= docker-compose.example.yml
+DB_SERVICE ?= abshelflife-db
+UI_SERVICE ?= abshelflife-ui
+SINGLE_SERVICE ?= abshelflife-single
 
 GREEN := \033[0;32m
 YELLOW := \033[0;33m
@@ -52,6 +60,46 @@ build-multiarch:
 		--push \
 		.
 
+## build-ui: Build UI image for amd64
+build-ui:
+	docker buildx build \
+		--platform linux/amd64 \
+		--tag $(UI_IMAGE_NAME):latest \
+		--tag $(UI_IMAGE_NAME):$(VERSION) \
+		--load \
+		./ui/abshelflife-ui
+
+## build-ui-aarch64: Build UI image for arm64
+build-ui-aarch64:
+	docker buildx build \
+		--platform linux/arm64 \
+		--tag $(UI_IMAGE_NAME):aarch64-$(VERSION) \
+		--load \
+		./ui/abshelflife-ui
+
+## build-single: Build single-container image for amd64
+build-single:
+	docker buildx build \
+		--platform linux/amd64 \
+		--file Dockerfile.single \
+		--tag $(SINGLE_IMAGE_NAME):single-latest \
+		--tag $(SINGLE_IMAGE_NAME):single-$(VERSION) \
+		--build-arg BUILD_DATE=$(BUILD_DATE) \
+		--build-arg VERSION=$(VERSION) \
+		--load \
+		.
+
+## build-single-aarch64: Build single-container image for arm64
+build-single-aarch64:
+	docker buildx build \
+		--platform linux/arm64 \
+		--file Dockerfile.aarch64.single \
+		--tag $(SINGLE_IMAGE_NAME):single-aarch64-$(VERSION) \
+		--build-arg BUILD_DATE=$(BUILD_DATE) \
+		--build-arg VERSION=$(VERSION) \
+		--load \
+		.
+
 ## test: Run quick container smoke test
 test:
 	@echo "$(GREEN)Running smoke test...$(NC)"
@@ -72,8 +120,14 @@ validate:
 	@docker run --rm -i hadolint/hadolint hadolint --ignore DL3018 --ignore DL3059 --ignore DL4006 - < Dockerfile || true
 	@echo "$(GREEN)Lint Dockerfile.aarch64$(NC)"
 	@docker run --rm -i hadolint/hadolint hadolint --ignore DL3018 --ignore DL3059 --ignore DL4006 - < Dockerfile.aarch64 || true
+	@echo "$(GREEN)Lint Dockerfile.single$(NC)"
+	@docker run --rm -i hadolint/hadolint hadolint --ignore DL3018 --ignore DL3059 --ignore DL4006 - < Dockerfile.single || true
+	@echo "$(GREEN)Lint Dockerfile.aarch64.single$(NC)"
+	@docker run --rm -i hadolint/hadolint hadolint --ignore DL3018 --ignore DL3059 --ignore DL4006 - < Dockerfile.aarch64.single || true
 	@echo "$(GREEN)Check shell scripts$(NC)"
-	@find root -type f \( -name "*.sh" -o -name "run" -o -name "finish" -o -name "abshelflife-*" \) -print0 | xargs -0 -I{} bash -n "{}"
+	@find root root-single -type f \( -name "*.sh" -o -name "run" -o -name "finish" -o -name "abshelflife-*" \) -print0 | xargs -0 -I{} bash -n "{}"
+	@echo "$(GREEN)Check UI python syntax$(NC)"
+	@python3 -m py_compile ui/abshelflife-ui/app.py
 
 ## security-scan: Run Trivy image scan
 security-scan: build
@@ -91,26 +145,38 @@ clean:
 
 ## start: Start services from compose example
 start:
-	docker compose -f docker-compose.example.yml up -d
+	docker compose -f $(COMPOSE_FILE) up -d $(DB_SERVICE)
+
+## start-ui: Start DB + UI profile
+start-ui:
+	docker compose -f $(COMPOSE_FILE) --profile ui up -d $(DB_SERVICE) $(UI_SERVICE)
+
+## start-single: Start single-container profile
+start-single:
+	docker compose -f $(COMPOSE_FILE) --profile single up -d $(SINGLE_SERVICE)
 
 ## stop: Stop services
 stop:
-	docker compose -f docker-compose.example.yml down
+	docker compose -f $(COMPOSE_FILE) down
 
 ## restart: Restart services
 restart: stop start
 
 ## status: Show compose service status
 status:
-	docker compose -f docker-compose.example.yml ps
+	docker compose -f $(COMPOSE_FILE) ps
 
 ## logs: Tail compose logs
 logs:
-	docker compose -f docker-compose.example.yml logs -f
+	docker compose -f $(COMPOSE_FILE) logs -f
 
-## shell: Open shell in abshelflife container
+## shell: Open shell in DB container
 shell:
-	docker compose -f docker-compose.example.yml exec abshelflife /bin/bash
+	docker compose -f $(COMPOSE_FILE) exec $(DB_SERVICE) /bin/bash
+
+## shell-ui: Open shell in UI container
+shell-ui:
+	docker compose -f $(COMPOSE_FILE) --profile ui exec $(UI_SERVICE) /bin/sh
 
 ## setup: Prepare env and secrets
 setup: env-setup secrets-generate
@@ -132,7 +198,9 @@ secrets-generate:
 	@mkdir -p secrets
 	@openssl rand -base64 48 | tr -d '=+/\n' | head -c 32 > secrets/abs_db_password.txt
 	@openssl rand -base64 48 | tr -d '=+/\n' | head -c 32 > secrets/mysql_root_password.txt
+	@openssl rand -base64 48 | tr -d '=+/\n' | head -c 32 > secrets/ui_secret_key.txt
 	@openssl rand -base64 48 | tr -d '=+/\n' | head -c 64 > secrets/ui_token_encryption_key.txt
+	@touch secrets/audible_api_bearer_token.txt
 	@chmod 600 secrets/*.txt || true
 	@echo "$(GREEN)Secrets generated$(NC)"
 

@@ -36,7 +36,7 @@ jobs:
         run: docker compose -f docker-compose.example.yml config >/dev/null
 
       - name: Validate UI python syntax
-        run: python3 -m py_compile ui/history-ui/app.py
+        run: python3 -m py_compile ui/abshelflife-ui/app.py
 
   build-test:
     name: Build Test
@@ -77,7 +77,7 @@ jobs:
       - name: Build UI image (no push)
         uses: docker/build-push-action@v6
         with:
-          context: ./ui/history-ui
+          context: ./ui/abshelflife-ui
           push: false
           cache-from: type=gha
           cache-to: type=gha,mode=max

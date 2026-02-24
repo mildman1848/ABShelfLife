@@ -22,7 +22,7 @@ ABShelfLife ist ein LinuxServer-orientiertes Docker-Image für persistentes Hist
 - `.env.example`
 - `runtime/` (lokale Dev-Bind-Mounts)
 - `secrets/` (lokale Secret-Dateien)
-- `ui/history-ui/` (optionales History-Frontend)
+- `ui/abshelflife-ui/` (optionales History-Frontend)
 
 ## Schnellstart
 ```bash
