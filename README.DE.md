@@ -2,7 +2,7 @@
 
 > 🇩🇪 **Deutsche Version** | 📖 **[English Version](README.md)**
 
-[![GitHub Release](https://img.shields.io/github/v/release/mildman1848/ABShelfLife?style=for-the-badge&logo=github&color=005AA4)](https://github.com/mildman1848/ABShelfLife/releases)
+[![GitHub Tag](https://img.shields.io/github/v/tag/mildman1848/ABShelfLife?style=for-the-badge&logo=github&color=005AA4)](https://github.com/mildman1848/ABShelfLife/tags)
 [![Docker Hub Pulls](https://img.shields.io/docker/pulls/mildman1848/abshelflife?style=for-the-badge&logo=docker&logoColor=fff&color=005AA4)](https://hub.docker.com/r/mildman1848/abshelflife)
 [![Docker Image Size](https://img.shields.io/docker/image-size/mildman1848/abshelflife/latest?style=for-the-badge&logo=docker&logoColor=fff&color=005AA4)](https://hub.docker.com/r/mildman1848/abshelflife)
 [![License](https://img.shields.io/github/license/mildman1848/ABShelfLife?style=for-the-badge&color=005AA4)](https://github.com/mildman1848/ABShelfLife/blob/main/LICENSE)
