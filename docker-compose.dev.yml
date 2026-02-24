@@ -1,7 +1,10 @@
 ---
 services:
   abshelflife:
-    image: ${IMAGE_NAME:-mildman1848/abshelflife:latest}
+    image: ${IMAGE_NAME:-abshelflife}
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: ${CONTAINER_NAME:-abshelflife}
     environment:
       - PUID=${PUID:-1000}

@@ -6,7 +6,7 @@
 IMAGE_NAME ?= $(or $(DOCKERHUB_SINGLE_REPOSITORY),$(USER)/abshelflife)
 VERSION := $(shell cat VERSION)
 BUILD_DATE := $(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
-COMPOSE_FILE ?= docker-compose.example.yml
+COMPOSE_FILE ?= docker-compose.dev.yml
 SERVICE ?= abshelflife
 
 GREEN := \033[0;32m

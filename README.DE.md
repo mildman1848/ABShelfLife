@@ -37,8 +37,11 @@ printf '%s' 'dein-mariadb-root-passwort' > secrets/mysql_root_password.txt
 printf '%s' 'dein-ui-secret-key' > secrets/ui_secret_key.txt
 printf '%s' 'dein-ui-token-encryption-key' > secrets/ui_token_encryption_key.txt
 
-# Single Container (DB + Sync + UI)
-docker compose -f docker-compose.example.yml up -d --build abshelflife
+# Start mit Docker-Hub-Image (DB + Sync + UI)
+docker compose -f docker-compose.example.yml up -d abshelflife
+
+# Lokaler Development-Build
+docker compose -f docker-compose.dev.yml up -d --build abshelflife
 ```
 
 UI: `http://<host>:8080`
