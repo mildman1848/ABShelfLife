@@ -37,34 +37,26 @@ jobs:
           MINOR="${BASH_REMATCH[2]}"
           CURRENT_MINOR="${MAJOR}.${MINOR}.x"
           REPO_URL="https://github.com/${GITHUB_REPOSITORY}"
-          python3 - <<PY
-from pathlib import Path
+          cat > SECURITY.md <<EOF
+          # Security Policy
 
-current_minor = "${CURRENT_MINOR}"
-repo_url = "${REPO_URL}"
+          ## Supported Versions
 
-content = f"""# Security Policy
+          Only the current release line receives security updates.
 
-## Supported Versions
+          | Version | Supported |
+          | ------- | --------- |
+          | ${CURRENT_MINOR} | :white_check_mark: |
+          | < ${CURRENT_MINOR} | :x: |
 
-Only the current release line receives security updates.
+          ## Reporting a Vulnerability
 
-| Version | Supported |
-| ------- | --------- |
-| {current_minor} | :white_check_mark: |
-| < {current_minor} | :x: |
+          Please use GitHub Security Advisories for private vulnerability disclosure:
 
-## Reporting a Vulnerability
+          - ${REPO_URL}/security/advisories/new
 
-Please use GitHub Security Advisories for private vulnerability disclosure:
-
-- {repo_url}/security/advisories/new
-
-If GitHub advisories are unavailable, open a private maintainer contact path and avoid public issue disclosure until triage is complete.
-"""
-
-Path("SECURITY.md").write_text(content, encoding="utf-8")
-PY
+          If GitHub advisories are unavailable, open a private maintainer contact path and avoid public issue disclosure until triage is complete.
+          EOF
 
       - name: Create PR if changed
         uses: peter-evans/create-pull-request@v7
