@@ -1,102 +1,99 @@
-# ABShelfLife
+# ABShelfLife - LinuxServer.io Style Edition
 
-Deutsche Dokumentation. Englische Version: `README.md`
+> 🇩🇪 **Deutsche Version** | 📖 **[English Version](README.md)**
 
-ABShelfLife ist ein LinuxServer-orientiertes Docker-Image für persistentes Historien-Tracking in Audiobookshelf.
+[![GitHub Release](https://img.shields.io/github/v/release/mildman1848/ABShelfLife?style=for-the-badge&logo=github&color=005AA4)](https://github.com/mildman1848/ABShelfLife/releases)
+[![Docker Hub Pulls](https://img.shields.io/docker/pulls/mildman1848/abshelflife?style=for-the-badge&logo=docker&logoColor=fff&color=005AA4)](https://hub.docker.com/r/mildman1848/abshelflife)
+[![Docker Image Size](https://img.shields.io/docker/image-size/mildman1848/abshelflife/latest?style=for-the-badge&logo=docker&logoColor=fff&color=005AA4)](https://hub.docker.com/r/mildman1848/abshelflife)
+[![License](https://img.shields.io/github/license/mildman1848/ABShelfLife?style=for-the-badge&color=005AA4)](https://github.com/mildman1848/ABShelfLife/blob/main/LICENSE)
 
-## Funktionen
-- Alpine-Basisimage mit s6-overlay
-- MariaDB-Persistenz in `/config/databases`
-- Verlaufstabellen (`progress_latest`, `progress_history`)
-- Outbox-basierte Rücksynchronisierung nach ABS (`progress_outbox`)
-- `FILE__`-Secret-Unterstützung
-- lokale Mount-Backups (`/config/backups`)
-- Multi-Target (mehrere Server/User) über UI-verwaltete ABS-Konten
-- optionales read-only History-UI (Profil `ui`)
+[![CI Status](https://img.shields.io/github/actions/workflow/status/mildman1848/ABShelfLife/ci.yml?branch=main&style=flat-square&logo=github&label=CI)](https://github.com/mildman1848/ABShelfLife/actions/workflows/ci.yml)
+[![Hadolint](https://img.shields.io/github/actions/workflow/status/mildman1848/ABShelfLife/hadolint.yml?branch=main&style=flat-square&logo=docker&label=Hadolint)](https://github.com/mildman1848/ABShelfLife/actions/workflows/hadolint.yml)
+[![Security Scan](https://img.shields.io/github/actions/workflow/status/mildman1848/ABShelfLife/security.yml?branch=main&style=flat-square&logo=github&label=Security)](https://github.com/mildman1848/ABShelfLife/actions/workflows/security.yml)
+[![Docker Release](https://img.shields.io/github/actions/workflow/status/mildman1848/ABShelfLife/docker-release.yml?branch=main&style=flat-square&logo=docker&label=Release)](https://github.com/mildman1848/ABShelfLife/actions/workflows/docker-release.yml)
+[![Version](https://img.shields.io/badge/version-v0.1.0-blue?style=flat-square&logo=github)](VERSION)
 
-## Repository-Struktur (LSIO-Style)
-- `Dockerfile`
-- `Dockerfile.aarch64`
-- `root/`
-- `docker-compose.example.yml`
-- `.env.example`
-- `runtime/` (lokale Dev-Bind-Mounts)
-- `secrets/` (lokale Secret-Dateien)
-- `ui/abshelflife-ui/` (optionales History-Frontend)
+---
+
+**Single-Container Audiobookshelf-History-Tracker mit LinuxServer-orientiertem Alpine-Baseimage, s6-overlay-Services, integrierter MariaDB und eingebautem UI inklusive bidirektionalem ABS-Sync.**
+
+## 📦 Verfügbare Registries
+
+```bash
+# Docker Hub
+docker pull mildman1848/abshelflife:latest
+
+# GHCR
+docker pull ghcr.io/mildman1848/abshelflife:latest
+```
 
 ## Schnellstart
+
 ```bash
 cp .env.example .env
+
 printf '%s' 'dein-db-passwort' > secrets/abs_db_password.txt
-printf '%s' 'dein-root-passwort' > secrets/mysql_root_password.txt
-printf '%s' 'dein-ui-token-key' > secrets/ui_token_encryption_key.txt
-docker compose -f docker-compose.example.yml up -d --build
+printf '%s' 'dein-mariadb-root-passwort' > secrets/mysql_root_password.txt
+printf '%s' 'dein-ui-secret-key' > secrets/ui_secret_key.txt
+printf '%s' 'dein-ui-token-encryption-key' > secrets/ui_token_encryption_key.txt
+
+# Single Container (DB + Sync + UI)
+docker compose -f docker-compose.example.yml up -d --build abshelflife
 ```
 
-## Optionales History-UI
+UI: `http://<host>:8080`
+
+## 🔐 Secret-Management
+
+ABShelfLife nutzt LinuxServer-konformes `FILE__`-Secret-Handling.
+
+Beispiele:
+- `FILE__ABS_DB_PASSWORD=/run/secrets/abs_db_password`
+- `FILE__MYSQL_ROOT_PASSWORD=/run/secrets/mysql_root_password`
+- `FILE__UI_SECRET_KEY=/run/secrets/ui_secret_key`
+- `FILE__UI_TOKEN_ENCRYPTION_KEY=/run/secrets/ui_token_encryption_key`
+- `FILE__AUDIBLE_API_BEARER_TOKEN=/run/secrets/audible_api_bearer_token`
+
+Beispiel-Secret-Dateien liegen unter `secrets/*.txt.example`.
+
+## Build & Test
+
 ```bash
-docker compose -f docker-compose.example.yml --profile ui up -d --build
-```
-Aufruf: `http://<host>:8080`
-
-## Automatisierung
-- `Makefile` und `VERSION` sind fuer lokale Build/Release-Routinen enthalten.
-- Dependabot-Konfiguration: `.github/dependabot.yml`
-- CI-Workflow: `.github/workflows/ci.yml`
-- Security-Workflow: `.github/workflows/security.yml`
-- Manueller Docker-Publish-Workflow (Docker Hub + GHCR): `.github/workflows/docker-release.yml`
-
-## Multi-Target (mehrere ABS-Server/-User)
-Füge in der UI unter `Einstellungen` ein oder mehrere ABS-Konten hinzu (URL, Nutzername, Token). ABShelfLife schreibt die Targets automatisch in `ABS_TARGETS_FILE` (`/config/app/targets.json`).
-
-Manuelle `targets.json`-Pflege wird weiterhin unterstützt und nutzt ein JSON-Array mit Targets:
-
-```json
-[
-  {
-    "id": "server1-userA",
-    "serverId": "server1",
-    "principalId": "philipp",
-    "url": "http://audiobookshelf-server1:13378",
-    "tokenFile": "/run/secrets/server1_userA_token"
-  },
-  {
-    "id": "server2-userA",
-    "serverId": "server2",
-    "principalId": "philipp",
-    "url": "http://audiobookshelf-server2:13378",
-    "tokenFile": "/run/secrets/server2_userA_token"
-  }
-]
+make help
+make build
+make start
+make logs
+make test
+make security-scan
 ```
 
-Eine Beispiel-Datei wird automatisch nach folgendem Pfad kopiert:
-- `/config/app/targets.json.example`
+## Make-Targets
 
-Jedes Target repräsentiert einen ABS-User-Kontext (ein Token). So kann ein einzelner ABShelfLife-Container viele User über einen oder mehrere ABS-Server synchronisieren.
+```bash
+make setup
+make env-setup
+make env-validate
+make secrets-generate
+make secrets-info
+make secrets-rotate
+make build
+make build-aarch64
+make build-multiarch
+make start
+make stop
+make restart
+make status
+make logs
+make shell
+```
 
-## Matching- und Migrationsstrategie (neuer ABS-Server)
-- Primaerstrategie: `ASIN` (empfohlen)
-- Fallbacks: `ISBN`, danach normalisiertes `title+author+duration`
-- Konfigurierbar ueber `ABS_MATCH_PRIORITY`
+## Dokumentation
 
-So funktioniert die Uebernahme von "bereits gehoert":
-1. Source-Target meldet `isFinished=true`
-2. ABShelfLife bildet den kanonischen Key (ASIN-first)
-3. Identity-Index mappt den Key auf das passende Item im Ziel-Target
-4. Outbox queued ein `isFinished=true` Update auf `/api/me/progress/...` im Ziel-ABS
+- Englische README: [`README.md`](README.md)
+- Englischer Changelog: [`CHANGELOG.md`](CHANGELOG.md)
+- Deutscher Changelog: [`CHANGELOG.DE.md`](CHANGELOG.DE.md)
+- Übersetzungsleitfaden: [`i18n/TRANSLATIONS.md`](i18n/TRANSLATIONS.md)
 
-Fuer bessere Match-Qualitaet:
-- ASIN/ISBN-Metadaten in ABS gepflegt halten
-- `ABS_ENABLE_LIBRARY_INDEX=1` aktiv lassen
-- fuer dieselbe Person serveruebergreifend dieselbe `principalId` verwenden
+## Originalprojekt-Kontext
 
-## Identitaetsstrategie
-- Primaere Identitaet sind ABS-native IDs plus kanonischer Metadaten-Key.
-- Konfliktfreies Schluesselmodell:
-- `target_id + user_id + library_item_id + episode_id`
-- Kanonischer Bruecken-Key fuer Cross-Target-Matching (ASIN/ISBN/TAD-Hash).
-
-## Changelog
-- Englisch: `CHANGELOG.md`
-- Deutsch: `CHANGELOG.DE.md`
+ABShelfLife synchronisiert gegen [Audiobookshelf](https://github.com/advplyr/audiobookshelf)-Instanzen per API und erweitert diese um persistentes, serverübergreifendes Historien-Tracking.

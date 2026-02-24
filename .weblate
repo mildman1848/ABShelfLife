@@ -1,9 +1,0 @@
-[weblate]
-url = https://hosted.weblate.org/api/
-translation = abshelflife/main
-
-[keys]
-# Keep API keys local (do not commit real secrets).
-# Create an untracked override file if needed (for example .weblate.ini)
-# and set your real key there.
-https://hosted.weblate.org/api/ = WEBLATE_API_TOKEN_PLACEHOLDER

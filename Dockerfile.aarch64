@@ -2,13 +2,11 @@
 
 FROM ghcr.io/linuxserver/baseimage-alpine:3.23
 
-# set version label
 ARG BUILD_DATE
 ARG VERSION
-LABEL build_version="ABShelfLife version:- ${VERSION} Build-date:- ${BUILD_DATE}"
+LABEL build_version="ABShelfLife single-container version:- ${VERSION} Build-date:- ${BUILD_DATE}"
 LABEL maintainer="abshelflife"
 
-# environment variables
 ENV MYSQL_DIR="/config" \
     DATADIR="/config/databases" \
     ABS_CONFIG_DIR="/config/app" \
@@ -27,17 +25,24 @@ RUN \
     mariadb-client \
     mariadb-common \
     mariadb-server-utils \
-    netcat-openbsd && \
+    netcat-openbsd \
+    python3 \
+    py3-pip && \
   printf "ABShelfLife version: %s\nBuild-date: %s\n" "${VERSION}" "${BUILD_DATE}" > /build_version && \
   echo "**** cleanup ****" && \
   rm -rf \
     /tmp/* \
     "$HOME/.cache"
 
-# copy local files
+COPY ui/abshelflife-ui/requirements.txt /opt/abshelflife/ui/requirements.txt
+RUN python3 -m venv /opt/venv && \
+    /opt/venv/bin/pip install --no-cache-dir -r /opt/abshelflife/ui/requirements.txt
+
+COPY ui/abshelflife-ui/app.py /opt/abshelflife/ui/app.py
+COPY ui/abshelflife-ui/templates /opt/abshelflife/ui/templates
+COPY ui/abshelflife-ui/static /opt/abshelflife/ui/static
+
 COPY root/ /
 
-# ports and volumes
-EXPOSE 3306
-
+EXPOSE 3306 8080
 VOLUME /config

@@ -14,17 +14,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Lint Dockerfile
-        uses: hadolint/hadolint-action@v3.3.0
-        with:
-          dockerfile: Dockerfile
-          ignore: DL3018,DL3059,DL4006
-
-      - name: Lint Dockerfile.aarch64
-        uses: hadolint/hadolint-action@v3.3.0
-        with:
-          dockerfile: Dockerfile.aarch64
-          ignore: DL3018,DL3059,DL4006
+      - name: Lint single-container Dockerfiles
+        run: |
+          docker run --rm -v "$PWD:/workspace" -w /workspace hadolint/hadolint \
+            hadolint --config .hadolint.yaml Dockerfile Dockerfile.aarch64
 
       - name: Validate shell scripts
         run: |
@@ -62,22 +55,15 @@ jobs:
           VERSION=$(cat VERSION | tr -d '\n\r')
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
 
-      - name: Build image (no push)
+      - name: Build single image (no push)
         uses: docker/build-push-action@v6
         with:
           context: .
+          file: Dockerfile
           platforms: ${{ matrix.platform }}
           push: false
           build-args: |
             BUILD_DATE=${{ github.event.head_commit.timestamp || github.run_id }}
             VERSION=${{ steps.version.outputs.version }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Build UI image (no push)
-        uses: docker/build-push-action@v6
-        with:
-          context: ./ui/abshelflife-ui
-          push: false
           cache-from: type=gha
           cache-to: type=gha,mode=max

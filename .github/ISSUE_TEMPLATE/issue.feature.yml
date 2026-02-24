@@ -1,0 +1,30 @@
+name: Feature request
+description: Suggest an improvement
+title: "[FEAT] <title>"
+labels: [enhancement]
+body:
+  - type: checkboxes
+    attributes:
+      label: Is this a new feature request?
+      description: Please search existing issues first.
+      options:
+        - label: I have searched the existing issues
+          required: true
+  - type: textarea
+    attributes:
+      label: Wanted change
+      description: What should be added or changed?
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Reason for change
+      description: Why is this useful?
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Proposed implementation
+      description: Optional technical proposal.
+    validations:
+      required: false

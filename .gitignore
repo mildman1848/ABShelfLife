@@ -23,7 +23,6 @@ secrets/*.txt
 secrets/backup-*/
 !secrets/*.example
 !secrets/.gitkeep
-.weblate.ini
 
 # Runtime data
 runtime/config/*

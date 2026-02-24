@@ -1,0 +1,10 @@
+ignored:
+  - DL3018  # pinning apk versions is impractical for baseimage-driven updates
+  - DL3059  # multiple consecutive RUN instructions are intentional for readability
+  - DL4006  # shell option behavior depends on explicit runtime shell usage
+
+failure-threshold: warning
+
+trustedRegistries:
+  - docker.io
+  - ghcr.io

@@ -12,12 +12,6 @@ updates:
       interval: weekly
     open-pull-requests-limit: 10
 
-  - package-ecosystem: docker
-    directory: "/ui/abshelflife-ui"
-    schedule:
-      interval: weekly
-    open-pull-requests-limit: 10
-
   - package-ecosystem: pip
     directory: "/ui/abshelflife-ui"
     schedule:

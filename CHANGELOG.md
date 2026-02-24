@@ -1,5 +1,7 @@
 # Changelog
 
+> 🇩🇪 **[German Version](CHANGELOG.DE.md)** | 📖 **English Version**
+
 All notable changes to this project are documented in this file.
 
 ## [Unreleased]
@@ -7,12 +9,23 @@ All notable changes to this project are documented in this file.
 ### Added
 - Manual "Rebuild Progress from ABS" action in Sync settings.
 - Manual "Clean Collected Library" action in Sync settings.
+- Dedicated Hadolint configuration (`.hadolint.yaml`) and workflow (`.github/workflows/hadolint.yml`) for all Dockerfiles.
+- Repository-wide single-container-only deployment mode (`abshelflife`) in compose, env, Makefile, and workflows.
+- GitHub community standards inspired by LSIO `docker-freshrss`: issue templates, PR template, and contributing guide.
+- `greetings.yml` workflow for first-time issue/PR messages.
+- Automated `SECURITY.md` synchronization workflow (`.github/workflows/security-policy-sync.yml`) based on `VERSION`.
 
 ### Changed
 - Dark mode contrast refresh for navigation, cards, stats widgets and forms.
 - Header brand title simplified to `ABShelfLife` (without tracker suffix).
 - Navigation reduced to `Home`, `Audiobooks`, `Podcasts`, `Settings` (history removed from top menu).
 - Deployment defaults now rely on UI-managed ABS accounts and `targets.json`.
+- Docker release workflow now publishes only the single image `abshelflife`.
+- CI/Security/Hadolint pipelines validate single-container Dockerfiles only.
+- Make defaults use `abshelflife` and single-container compose flows only.
+- Legacy multi-container compose services (`abshelflife-db`, `abshelflife-ui`) and legacy Dockerfiles were removed from active maintenance paths.
+- Weblate/Crowdin integration files and references were removed from the repository.
+- `permissions.yml` now performs executable permission checks for init/service scripts via LSIO reusable workflow.
 
 ### Fixed
 - Sync settings form nesting issue (`cancel edit` no longer uses nested `<form>`).

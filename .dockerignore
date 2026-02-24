@@ -22,7 +22,6 @@ logs/
 .env\ copy.example
 *.secret
 secrets/*.txt
-.weblate.ini
 
 runtime/
 backups/

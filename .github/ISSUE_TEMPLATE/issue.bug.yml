@@ -1,0 +1,66 @@
+name: Bug report
+description: Report a reproducible problem
+title: "[BUG] <title>"
+labels: [bug]
+body:
+  - type: checkboxes
+    attributes:
+      label: Is there an existing issue for this?
+      description: Please search existing issues first.
+      options:
+        - label: I have searched the existing issues
+          required: true
+  - type: textarea
+    attributes:
+      label: Current Behavior
+      description: What is happening now?
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Expected Behavior
+      description: What should happen instead?
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Steps To Reproduce
+      placeholder: |
+        1. Configure ...
+        2. Run ...
+        3. Open ...
+        4. See error ...
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Environment
+      value: |
+        - OS:
+        - Docker version:
+        - Deployment method: docker compose / docker run
+      render: markdown
+    validations:
+      required: true
+  - type: dropdown
+    attributes:
+      label: CPU architecture
+      options:
+        - x86-64
+        - arm64
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Container creation config
+      description: Paste your compose service or docker run command.
+      render: yaml
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Relevant logs
+      description: Provide relevant logs from `docker compose logs abshelflife`.
+      render: bash
+    validations:
+      required: true

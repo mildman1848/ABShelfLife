@@ -15,7 +15,7 @@ on:
 
 jobs:
   release:
-    name: Build and Publish Docker Images
+    name: Build and Publish Docker Image
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -47,8 +47,8 @@ jobs:
       - name: Prepare tags
         id: prep
         run: |
-          if [ -n "${{ secrets.DOCKERHUB_REPOSITORY }}" ]; then
-            DOCKERHUB_IMAGE="docker.io/${{ secrets.DOCKERHUB_REPOSITORY }}"
+          if [ -n "${{ secrets.DOCKERHUB_SINGLE_REPOSITORY }}" ]; then
+            DOCKERHUB_IMAGE="docker.io/${{ secrets.DOCKERHUB_SINGLE_REPOSITORY }}"
           else
             DOCKERHUB_IMAGE="docker.io/${{ github.repository_owner }}/abshelflife"
           fi
@@ -62,27 +62,16 @@ jobs:
           fi
           echo "tags=${TAGS}" >> "$GITHUB_OUTPUT"
 
-      - name: Build and push image
+      - name: Build and push single image
         uses: docker/build-push-action@v6
         with:
           context: .
+          file: Dockerfile
           push: true
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.prep.outputs.tags }}
           build-args: |
             BUILD_DATE=${{ github.event.repository.updated_at }}
             VERSION=${{ inputs.tag }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Build and push abshelflife-ui image
-        uses: docker/build-push-action@v6
-        with:
-          context: ./ui/abshelflife-ui
-          push: true
-          platforms: linux/amd64,linux/arm64
-          tags: |
-            ghcr.io/${{ github.repository_owner }}/abshelflife-ui:${{ inputs.tag }}
-            docker.io/${{ secrets.DOCKERHUB_REPOSITORY || format('{0}/abshelflife-ui', github.repository_owner) }}:${{ inputs.tag }}
           cache-from: type=gha
           cache-to: type=gha,mode=max

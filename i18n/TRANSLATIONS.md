@@ -1,30 +1,18 @@
 # Translation Operations
 
-## Crowdin
-Required environment variables:
-- `CROWDIN_PROJECT_ID`
-- `CROWDIN_PERSONAL_TOKEN`
+## Source Layout
 
-Config file:
-- `crowdin.yml`
+- Source language: `i18n/locales/en/**/*.json`
+- German translation: `i18n/locales/de/**/*.json`
 
-Expected layout:
-- source: `i18n/locales/en/**/*.json`
-- translations: `i18n/locales/<lang>/**/*.json`
+## Workflow
 
-## Weblate
-CLI config file:
-- `.weblate`
-- component template: `i18n/weblate-component.template.yml`
-
-Recommended local override (untracked):
-- `.weblate.ini`
-- starter template: `.weblate.ini.example`
-
-Required local value:
-- Weblate API token for `https://hosted.weblate.org/api/`
+1. Update English source strings first.
+2. Keep German strings semantically aligned.
+3. Validate JSON syntax before committing.
 
 ## Language Policy
+
 - English (`en`) is source-of-truth.
-- German (`de`) is first maintained translation.
-- Additional locales are community maintained.
+- German (`de`) is the maintained translation.
+- Additional locales can be added under `i18n/locales/<lang>/` when needed.
